@@ -9,27 +9,27 @@ pipeline {
     stages {
         stage('Install') {
             steps {
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'npm run build'
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'npm test -- --watchAll=false'
+                sh 'npm test -- --watchAll=false'
             }
         }
 
         stage('Deploy') {
             steps {
-                bat """
+                sh """
                 npm install netlify-cli -g
-                netlify deploy --dir=build --prod --auth %NETLIFY_AUTH_TOKEN% --site %NETLIFY_SITE_ID%
+                netlify deploy --dir=build --prod --auth $NETLIFY_AUTH_TOKEN --site $NETLIFY_SITE_ID
                 """
             }
         }
