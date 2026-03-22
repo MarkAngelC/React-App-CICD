@@ -2,11 +2,12 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node' 
+        nodejs 'node'
+    }
 
     environment {
-        NETLIFY_AUTH_TOKEN = credentials('nfp_JjzeRR2YaP9Vy4YzwS255CUPT41TCayncb5c')
-        NETLIFY_SITE_ID = 'https://react-app-cicd.netlify.app/'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        NETLIFY_SITE_ID = 'your-site-id'
     }
 
     stages {
