@@ -1,42 +1,69 @@
 pipeline {
     agent any
-
-    environment {
-        NETLIFY_AUTH_TOKEN = credentials('myreactapp2')
-        NETLIFY_SITE_ID = '148ac007-e9b6-4256-b856-bd55ef5c6a0c'
-    }
-
     stages {
+        stage('Docker') {
+            steps {
+                sh '''
+                    docker --version
+                    docker build -t my-docker-image .
+                '''
+            }
+        }
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:22.14.0'
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
                     ls -la
-                    node --version
-                    npm --version
+                    node -v
+                    npm -v
                     npm install
                     npm run build
                     ls -la
                 '''
             }
         }
-
         stage('Test') {
+            agent {
+                docker {
+                    image 'node:22.14.0'
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
                     test -f build/index.html
-                    npm test -- --watchAll=false
+                    npm test
                 '''
             }
         }
-
         stage('Deploy') {
+            agent {
+                docker {
+                    // image 'node:22.14.0'
+                    image 'my-docker-image'
+                    reuseNode true
+                }
+            }
+            environment {
+                NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
+                NETLIFY_SITE_ID = credentials('netlify-site-id')
+            }
             steps {
                 sh '''
-                    npm install netlify-cli
-                    npx netlify --version
-                    echo "Site ID: $NETLIFY_SITE_ID"
-                    npx netlify status --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
-                    npx netlify deploy --prod --dir=build --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
+                    # npm install netlify-cli
+                    # node_modules/.bin/netlify --version
+                    # node_modules/.bin/netlify status
+                    # node_modules/.bin/netlify deploy --dir=build --prod
+
+                    netlify --version
+                    echo "Site Id: $NETLIFY_SITE_ID"
+                    netlify status
+                    netlify deploy --dir=build --prod
                 '''
             }
         }
