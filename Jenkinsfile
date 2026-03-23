@@ -1,14 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage('Docker') {
-            steps {
-                sh '''
-                    docker --version
-                    docker build -t my-docker-image .
-                '''
-            }
-        }
         stage('Build') {
             agent {
                 docker {
@@ -44,8 +36,7 @@ pipeline {
         stage('Deploy') {
             agent {
                 docker {
-                    // image 'node:22.14.0'
-                    image 'my-docker-image'
+                    image 'node:22.14.0'
                     reuseNode true
                 }
             }
