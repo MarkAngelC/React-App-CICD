@@ -1,5 +1,22 @@
 pipeline {
     agent any
+
+    environment {
+        NETLIFY_AUTH_TOKEN = credentials('netlifytoken2')
+        NETLIFY_SITE_ID = '9a577c91-aca4-4eac-b13d-8d33ab354921'
+    }
+
+    stage('Debug') {
+    steps {
+        sh '''
+            echo "Checking environment"
+            which node
+            docker --versionx`
+            docker ps
+        '''
+    }
+}
+
     stages {
         stage('Build') {
             agent {
@@ -10,15 +27,14 @@ pipeline {
             }
             steps {
                 sh '''
-                    ls -la
                     node -v
                     npm -v
-                    npm install
+                    npm ci
                     npm run build
-                    ls -la
                 '''
             }
         }
+
         stage('Test') {
             agent {
                 docker {
@@ -29,30 +45,11 @@ pipeline {
             steps {
                 sh '''
                     test -f build/index.html
-                    npm test
+                    npm test -- --watchAll=false
                 '''
             }
         }
-        stage('Deploy') {
-            agent {
-                docker {
-                    image 'node:22.14.0'
-                    reuseNode true
-                }
-            }
-            environment {
-                NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
-                NETLIFY_SITE_ID = credentials('netlify-site-id')
-            }
-            steps {
-                sh '''
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
 
-                '''
-            }
-        }
+        
     }
 }
