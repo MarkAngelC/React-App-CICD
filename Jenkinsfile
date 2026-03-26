@@ -6,17 +6,6 @@ pipeline {
         NETLIFY_SITE_ID = '9a577c91-aca4-4eac-b13d-8d33ab354921'
     }
 
-    stage('Debug') {
-    steps {
-        sh '''
-            echo "Checking environment"
-            which node
-            docker --versionx`
-            docker ps
-        '''
-    }
-}
-
     stages {
         stage('Build') {
             agent {
